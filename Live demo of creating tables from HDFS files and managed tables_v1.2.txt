@@ -1,0 +1,514 @@
+/*********************************************************************/
+/****************               EXERCISE 1             ***************/
+/*********************************************************************/
+
+/**************** FROM FILE ***************/
+CREATE EXTERNAL TABLE IF NOT EXISTS my_schema.airbnb_flat (
+id string
+,listing_id string
+,name string
+,host_id string
+,host_name string
+,neighbourhood_full string
+,coordinates string
+,room_type string
+,price string
+,number_of_reviews string
+,last_review string
+,reviews_per_month string
+,availability_365 string
+,rating string
+,number_of_stays string
+,5_stars string
+,listing_added string
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION '/sandbox/bi_mal/mlahoya/training/airbnb/airbnb.csv'
+tblproperties ("skip.header.line.count"="1")
+
+
+/**************** FROM FOLDER ***************/
+CREATE EXTERNAL TABLE IF NOT EXISTS my_schema.airbnb_flat (
+id string
+,listing_id string
+,name string
+,host_id string
+,host_name string
+,neighbourhood_full string
+,coordinates string
+,room_type string
+,price string
+,number_of_reviews string
+,last_review string
+,reviews_per_month string
+,availability_365 string
+,rating string
+,number_of_stays string
+,5_stars string
+,listing_added string
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION '/sandbox/bi_mal/mlahoya/training/airbnb'
+tblproperties ("skip.header.line.count"="1")
+
+
+/**************** SERDE ***************/
+CREATE EXTERNAL TABLE IF NOT EXISTS my_schema.airbnb_flat (
+id string
+,listing_id string
+,name string
+,host_id string
+,host_name string
+,neighbourhood_full string
+,coordinates string
+,room_type string
+,price string
+,number_of_reviews string
+,last_review string
+,reviews_per_month string
+,availability_365 string
+,rating string
+,number_of_stays string
+,5_stars string
+,listing_added string
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+WITH SERDEPROPERTIES (
+   "separatorChar" = ",",
+   "quoteChar"     = "\""
+)
+STORED AS TEXTFILE
+LOCATION '/sandbox/bi_mal/mlahoya/training/airbnb'
+tblproperties ("skip.header.line.count"="1")
+
+
+/**************** QUESTION ***************/
+CREATE EXTERNAL TABLE IF NOT EXISTS my_schema.airbnb_flat_format_reduced (
+neighbourhood_full string
+,coordinates string
+,room_type string
+,price string
+,number_of_reviews int
+,last_review string
+,reviews_per_month float
+,availability_365 int
+,rating float
+,number_of_stays float
+,5_stars float
+,listing_added date
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+WITH SERDEPROPERTIES (
+   "separatorChar" = ",",
+   "quoteChar"     = "\""
+)
+STORED AS TEXTFILE
+LOCATION '/sandbox/bi_mal/mlahoya/training/airbnb'
+tblproperties ("skip.header.line.count"="1")
+
+
+/**************** ORC ***************/
+CREATE TABLE IF NOT EXISTS my_schema.airbnb
+STORED AS ORC AS (SELECT * FROM my_schema.airbnb_flat)
+
+/**************** SHOW CREATE ***************/
+
+show create table my_schema.airbnb_flat
+show create table my_schema.airbnb
+
+/**************** DESCRIBE ***************/
+
+DESC EXTENDED my_schema.airbnb_flat
+
+DESC FORMATTED my_schema.airbnb_flat
+DESC FORMATTED my_schema.airbnb
+
+/**************** 
+total size 2022986 2MB
+total size 662643  0.6MB 
+***************/
+
+/**************** ALTER ***************/
+select * from my_schema.airbnb
+-- change the comment of a table
+ALTER TABLE my_schema.airbnb SET TBLPROPERTIES ('comment' = 'this is an ORC managed table with a test dataset for airbnb usage in NY');
+
+-- Add a comment to column coordinates
+ALTER TABLE my_schema.airbnb CHANGE coordinates coordinates STRING COMMENT '(longitude,latitude)'
+
+-- change type of listing_id
+ALTER TABLE my_schema.airbnb CHANGE listing_id listing_id double 
+
+/**************** ATLAS 
+URL: http://rtdw-os-hdp-master-1.ltdev.internal:21000/
+User: Admin
+Password: Please, ask for it.
+***************/
+
+
+
+/**************** FLAT FORMAT ***************/
+CREATE EXTERNAL TABLE IF NOT EXISTS my_schema.airbnb_flat (
+id int
+,listing_id int
+,name string
+,host_id int
+,host_name string
+,neighbourhood_full string
+,coordinates string
+,room_type string
+,price string
+,number_of_reviews int
+,last_review string
+,reviews_per_month float
+,availability_365 int
+,rating float
+,number_of_stays float
+,5_stars float
+,listing_added date
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+WITH SERDEPROPERTIES (
+   "separatorChar" = ",",
+   "quoteChar"     = "\""
+)
+STORED AS TEXTFILE
+LOCATION '/sandbox/bi_mal/mlahoya/training/airbnb'
+tblproperties ("skip.header.line.count"="1")
+
+
+
+/*********************************************************************/
+/****************               EXERCISE 2             ***************/
+/*********************************************************************/
+
+/**************** CREATE EXTERNAL ***************/
+
+CREATE EXTERNAL TABLE IF NOT EXISTS my_schema.example (
+ date_start string,
+ date_end string,
+ action_name string,
+ user_name string,
+ attributes map<string,string>
+)
+COMMENT 'Data from the example csv'
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'
+COLLECTION ITEMS TERMINATED BY ','
+MAP KEYS TERMINATED BY ':'
+STORED AS TEXTFILE
+location '/sandbox/bi_mal/mlahoya/training/sample'
+tblproperties ("skip.header.line.count"="1")
+
+
+/**************** CREATE EXTERNAL TYPE ***************/
+
+CREATE EXTERNAL TABLE IF NOT EXISTS my_schema.example (
+ date_start int,
+ date_end int,
+ action_name string,
+ user_name string,
+ attributes map<string,string>
+)
+COMMENT 'Data from the example csv'
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'
+COLLECTION ITEMS TERMINATED BY ','
+MAP KEYS TERMINATED BY ':'
+STORED AS TEXTFILE
+location '/sandbox/bi_mal/mlahoya/training/sample'
+tblproperties ("skip.header.line.count"="1")
+
+
+/**************** LATERAL VIEW UDTF ***************/
+
+select
+    date_start
+  , date_end
+  , action_name
+  , user_name
+  , attributes
+  , map_key
+  , map_value
+from my_schema.example
+  lateral view outer explode(attributes) C as map_key, map_value
+
+
+/**************** CONVERT DATE KO ***************/
+select
+    to_date(date_start,'DDMMYYYY')
+  , date_end
+  , action_name
+  , user_name
+  , attributes
+  , map_key
+  , map_value
+from my_schema.example
+  lateral view outer explode(attributes) C as map_key, map_value
+
+
+/**************** CONVERT DATE OK ***************/
+select
+    to_date(from_unixtime(unix_timestamp(date_start,'DDMMyyyy')))as date_start
+  , to_date(from_unixtime(unix_timestamp(date_end,'DDMMyyyy')))as date_end
+  , action_name
+  , user_name
+  , attributes
+  , map_key
+  , map_value
+from my_schema.example
+  lateral view outer explode(attributes) C as map_key, map_value
+
+/* https://stackoverflow.com/questions/8686331/y-returns-2012-while-y-returns-2011-in-simpledateformat  */
+
+/**************** ORC ***************/
+
+CREATE TABLE IF NOT EXISTS my_schema.example_data
+ STORED AS ORC
+AS(
+
+    select
+        to_date(from_unixtime(unix_timestamp(date_start,'DDMMyyyy')))as date_start
+      , to_date(from_unixtime(unix_timestamp(date_end,'DDMMyyyy')))as date_end
+      , action_name
+      , user_name
+      , attributes
+      , map_key
+      , map_value
+    from my_schema.example
+      lateral view outer explode(attributes) C as map_key, map_value
+
+  )
+
+/**************** DESCRIBE ***************/
+describe formatted my_schema.example_data
+
+/**************** DROP ***************/
+drop table my_schema.example_data
+
+
+/**************** EXAMPLE ***************/
+create table table1 (col1 string, col2 int)
+row format delimited fields terminated by ' '
+stored as textfile location '/sandbox/location/table1'
+
+
+/*********************************************************************/
+/****************               EXERCISE 3             ***************/
+/*********************************************************************/
+
+%spark2.pyspark
+# reading the exercise.csv into a dataframe infering the schema, using | as field delimiter and using the first row as header
+df_tmp = spark.read.format("csv").option("sep",  "|").option("inferschema","true").option("header", "true").load("hdfs://rtdw-os-hdp-master-3.ltdev.internal/sandbox/bi_mal/mlahoya/training/sample/*")
+#showing the schema that has been inferred
+df_tmp.printSchema()
+
+
+%spark2.pyspark
+#creating a temporary table in Hive called 'exercise'
+df_tmp.createOrReplaceTempView("exercise")
+
+
+%spark2.pyspark
+# reading the values of the temporary table
+read_values = spark.sql("select * from exercise")
+read_values.show()
+
+
+%spark2.pyspark
+#using a schema to force data types
+from pyspark.sql.types import *
+
+sc = spark.sparkContext
+
+table_definition = StructType([
+StructField('start_date', StringType(), True),
+StructField('end_date', StringType(), False),
+StructField('action_name', StringType(), False),
+StructField('user_name', StringType(), False),
+StructField('attributes', MapType(StringType(),StringType(),True), False)
+])
+
+df_tmp = spark.read.format("csv").option("sep",  "|").schema(table_definition).option("header", "true").load("hdfs://rtdw-os-hdp-master-3.ltdev.internal/sandbox/bi_mal/mlahoya/training/sample/*")
+
+df_tmp.printSchema()
+
+
+%spark2.pyspark
+#create a temp table with all the data
+df_tmp.createOrReplaceTempView("example")
+#getting the data
+read_values = spark.sql("select * from example")
+read_values.show()
+
+
+%spark2.pyspark
+#using a schema to force data types
+
+from pyspark.sql.types import *
+
+sc = spark.sparkContext
+
+table_definition = StructType([
+StructField('start_date', StringType(), True),
+StructField('end_date', StringType(), False),
+StructField('action_name', StringType(), False),
+StructField('user_name', StringType(), False),
+StructField('attributes', StringType(), False)
+])
+
+df_tmp = spark.read.format("csv").option("sep",  "|").schema(table_definition).option("header", "true").load("hdfs://rtdw-os-hdp-master-3.ltdev.internal/sandbox/bi_mal/mlahoya/training/sample/*")
+
+df_tmp.printSchema()
+
+
+%spark2.pyspark
+#create a temp table with all the data
+df_tmp.createOrReplaceTempView("example")
+#getting the data and doing some data type conversions
+
+read_values = spark.sql("""select 
+                                to_date(from_unixtime(unix_timestamp(start_date,'DDMMyyyy'))) as start_date
+                                , to_date(from_unixtime(unix_timestamp(end_date,'DDMMyyyy'))) as end_date
+                                , action_name
+                                , user_name
+                                , str_to_map(attributes, ',', ':')as map 
+                            from example""")
+
+read_values.show()
+
+
+%spark2.pyspark
+from pyspark.sql.functions import explode_outer
+modified_values = read_values.select("start_date", "end_date", "action_name","user_name", explode_outer("map"))
+modified_values.show()
+
+
+%spark2.pyspark
+
+"""
+TO CREATE HIVE MANAGED INTERNAL TABLES USING PYSPARK
+"""
+from pyspark_llap import HiveWarehouseSession
+hive = HiveWarehouseSession.session(spark).build()
+# catalogue operations https://docs.cloudera.com/HDPDocuments/HDP3/HDP-3.1.4/integrating-hive/content/hive-hwc-catalog-operations.html
+hive.setDatabase ('my_schema')
+hive.createTable("example_table").ifNotExists().column("start_date", "date").column("end_date", "date").column("action_name", "string").column("user_name", "string").column("key", "string").column("value", "string").create()
+
+#inserting into the table
+modified_values.write.format(HiveWarehouseSession.HIVE_WAREHOUSE_CONNECTOR).option("table", "my_schema.example_table").mode("Overwrite").save()
+
+
+
+
+/*********************************************************************/
+/****************               EXERCISE 4             ***************/
+/*********************************************************************/
+
+
+--Create your staging table without Partition
+CREATE EXTERNAL TABLE IF NOT EXISTS my_schema.employees_flat (
+name_employee string
+,city string
+,country string
+,employee_id string
+,year_join string
+,month_join string
+,day_join string
+,dept string
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE
+LOCATION '/sandbox/bi_mal/mlahoya/training/employees'
+tblproperties ("skip.header.line.count"="1")
+
+
+select * from my_schema.employees_flat
+
+describe formatted my_schema.employees_flat
+
+
+--Create production table with the columns you want to partition upon. In this case you want to partition upon dept column:
+CREATE EXTERNAL TABLE IF NOT EXISTS my_schema.employees_part (
+name_employee string
+,city string
+,country string
+,employee_id string
+,year_join string
+,month_join string
+,day_join string
+,dept string
+)
+PARTITIONED BY (dept string)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+STORED AS ORC
+--cannot partition by an existing field
+
+
+
+CREATE EXTERNAL TABLE IF NOT EXISTS my_schema.employees_part (
+name_employee string
+,city string
+,country string
+,employee_id string
+,year_join string
+,month_join string
+,day_join string
+)
+PARTITIONED BY (dept string)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+STORED AS ORC
+
+desc formatted my_schema.employees_part
+
+
+--manual partitions
+insert overwrite table my_schema.employees_part partition(dept='Production') select name_employee, city, country, employee_id, year_join, month_join, day_join from my_schema.employees_flat where dept='Production'
+insert overwrite table my_schema.employees_part partition(dept='Research and Development') select name_employee, city, country, employee_id, year_join, month_join, day_join from my_schema.employees_flat where dept='Research and Development'
+insert overwrite table my_schema.employees_part partition(dept='Purchasing') select name_employee, city, country, employee_id, year_join, month_join, day_join from my_schema.employees_flat where dept='Purchasing'
+insert overwrite table my_schema.employees_part partition(dept='Marketing') select name_employee, city, country, employee_id, year_join, month_join, day_join from my_schema.employees_flat where dept='Marketing'
+insert overwrite table my_schema.employees_part partition(dept='Human Resource Management') select name_employee, city, country, employee_id, year_join, month_join, day_join from my_schema.employees_flat where dept='Human Resource Management'
+insert overwrite table my_schema.employees_part partition(dept='Accounting and Finance') select name_employee, city, country, employee_id, year_join, month_join, day_join from my_schema.employees_flat where dept='Accounting and Finance'
+--takes some time to create the partitions
+
+desc formatted my_schema.employees_part
+
+SHOW PARTITIONS my_schema.employees_part
+
+
+--Verify data is correctly populated in partition:
+select * from my_schema.employees_part where dept='Production'
+
+
+--Create production table with the columns you want to partition upon. In this case you want to partition upon year and month columns:
+CREATE EXTERNAL TABLE IF NOT EXISTS my_schema.employees_part2 (
+name_employee string
+,city string
+,employee_id string
+,country string
+,day_join string
+,dept string
+)
+partitioned by (year_join string, month_join string)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY ','
+STORED AS ORC
+
+--dynamic partitions created automatically when new data is inserted
+--Set following two properties for your Hive session:
+SET hive.exec.dynamic.partition=true
+SET hive.exec.dynamic.partition.mode=nonstrict
+
+insert overwrite table my_schema.employees_part2 partition(year_join, month_join) select name_employee, city, employee_id, country, day_join, dept,  year_join, month_join from my_schema.employees_flat
+
+desc formatted  my_schema.employees_part2
+
+SHOW PARTITIONS my_schema.employees_part2
+
+
+
+
+
+
