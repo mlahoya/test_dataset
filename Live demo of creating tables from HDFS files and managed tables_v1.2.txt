@@ -299,11 +299,15 @@ stored as textfile location '/sandbox/location/table1'
 /****************               EXERCISE 3             ***************/
 /*********************************************************************/
 
-%spark2.pyspark
 # reading the exercise.csv into a dataframe infering the schema, using | as field delimiter and using the first row as header
-df_tmp = spark.read.format("csv").option("sep",  "|").option("inferschema","true").option("header", "true").load("hdfs://rtdw-os-hdp-master-3.ltdev.internal/sandbox/bi_mal/mlahoya/training/sample/*")
+df_tmp = spark.read.format("csv") \
+.option("sep",  "|") \
+.option("inferschema","true") \
+.option("header", "true") \
+.load("hdfs://rtdw-os-hdp-master-1.ltdev.internal/sandbox/bi_mal/mlahoya/training/sample/*")
 #showing the schema that has been inferred
 df_tmp.printSchema()
+#NOTE: check ambari for the active node in HDFS it could have changed to rtdw-os-hdp-master-1.ltdev.internal
 
 
 %spark2.pyspark
@@ -359,7 +363,12 @@ StructField('user_name', StringType(), False),
 StructField('attributes', StringType(), False)
 ])
 
-df_tmp = spark.read.format("csv").option("sep",  "|").schema(table_definition).option("header", "true").load("hdfs://rtdw-os-hdp-master-3.ltdev.internal/sandbox/bi_mal/mlahoya/training/sample/*")
+df_tmp = spark.read.format("csv")  \
+.option("sep",  "|") \
+.schema(table_definition) \
+.option("header", "true") \
+.load("hdfs://rtdw-os-hdp-master-1.ltdev.internal/sandbox/bi_mal/mlahoya/training/sample/*")
+#NOTE: check ambari for the active node in HDFS it could have changed to rtdw-os-hdp-master-1.ltdev.internal
 
 df_tmp.printSchema()
 
@@ -394,8 +403,16 @@ TO CREATE HIVE MANAGED INTERNAL TABLES USING PYSPARK
 from pyspark_llap import HiveWarehouseSession
 hive = HiveWarehouseSession.session(spark).build()
 # catalogue operations https://docs.cloudera.com/HDPDocuments/HDP3/HDP-3.1.4/integrating-hive/content/hive-hwc-catalog-operations.html
-hive.setDatabase ('my_schema')
-hive.createTable("example_table").ifNotExists().column("start_date", "date").column("end_date", "date").column("action_name", "string").column("user_name", "string").column("key", "string").column("value", "string").create()
+hive.setDatabase ('marta_poc')
+hive.createTable("example_table") \
+.ifNotExists() \
+.column("start_date", "date") \
+.column("end_date", "date") \
+.column("action_name", "string") \
+.column("user_name", "string") \
+.column("key", "string") \
+.column("value", "string") \
+.create()
 
 #inserting into the table
 modified_values.write.format(HiveWarehouseSession.HIVE_WAREHOUSE_CONNECTOR).option("table", "my_schema.example_table").mode("Overwrite").save()
@@ -432,7 +449,7 @@ describe formatted my_schema.employees_flat
 
 
 --Create production table with the columns you want to partition upon. In this case you want to partition upon dept column:
-CREATE EXTERNAL TABLE IF NOT EXISTS my_schema.employees_part (
+CREATE TABLE IF NOT EXISTS my_schema.employees_part (
 name_employee string
 ,city string
 ,country string
@@ -449,7 +466,7 @@ STORED AS ORC
 
 
 
-CREATE EXTERNAL TABLE IF NOT EXISTS my_schema.employees_part (
+CREATE TABLE IF NOT EXISTS my_schema.employees_part (
 name_employee string
 ,city string
 ,country string
@@ -484,7 +501,7 @@ select * from my_schema.employees_part where dept='Production'
 
 
 --Create production table with the columns you want to partition upon. In this case you want to partition upon year and month columns:
-CREATE EXTERNAL TABLE IF NOT EXISTS my_schema.employees_part2 (
+CREATE TABLE IF NOT EXISTS my_schema.employees_part2 (
 name_employee string
 ,city string
 ,employee_id string
