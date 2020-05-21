@@ -2,6 +2,8 @@
 /****************               EXERCISE 1             ***************/
 /*********************************************************************/
 
+create schema if not exists my_schema
+
 /**************** FROM FILE ***************/
 CREATE EXTERNAL TABLE IF NOT EXISTS my_schema.airbnb_flat (
 id string
@@ -304,10 +306,11 @@ df_tmp = spark.read.format("csv") \
 .option("sep",  "|") \
 .option("inferschema","true") \
 .option("header", "true") \
-.load("hdfs://rtdw-os-hdp-master-1.ltdev.internal/sandbox/bi_mal/mlahoya/training/sample/*")
+.load("hdfs://master/sandbox/bi_mal/mlahoya/training/sample/*")
 #showing the schema that has been inferred
 df_tmp.printSchema()
-#NOTE: check ambari for the active node in HDFS it could have changed to rtdw-os-hdp-master-1.ltdev.internal
+#master will be the master node in HDFS, e.g RTDWLTDEV:8020
+
 
 
 %spark2.pyspark
@@ -335,7 +338,12 @@ StructField('user_name', StringType(), False),
 StructField('attributes', MapType(StringType(),StringType(),True), False)
 ])
 
-df_tmp = spark.read.format("csv").option("sep",  "|").schema(table_definition).option("header", "true").load("hdfs://rtdw-os-hdp-master-3.ltdev.internal/sandbox/bi_mal/mlahoya/training/sample/*")
+df_tmp = spark.read.format("csv")  \
+.option("sep",  "|") \
+.schema(table_definition) \
+.option("header", "true") \
+.load("hdfs://master/sandbox/bi_mal/mlahoya/training/sample/*")
+#master will be the master node in HDFS, e.g RTDWLTDEV:8020
 
 df_tmp.printSchema()
 
@@ -367,8 +375,8 @@ df_tmp = spark.read.format("csv")  \
 .option("sep",  "|") \
 .schema(table_definition) \
 .option("header", "true") \
-.load("hdfs://rtdw-os-hdp-master-1.ltdev.internal/sandbox/bi_mal/mlahoya/training/sample/*")
-#NOTE: check ambari for the active node in HDFS it could have changed to rtdw-os-hdp-master-1.ltdev.internal
+.load("hdfs://master/sandbox/bi_mal/mlahoya/training/sample/*")
+#master will be the master node in HDFS, e.g RTDWLTDEV:8020
 
 df_tmp.printSchema()
 
